@@ -3,6 +3,7 @@ package com.shivam.smartnotes.controller;
 import com.shivam.smartnotes.dto.UserRegisterRequest;
 import com.shivam.smartnotes.dto.UserResponse;
 import com.shivam.smartnotes.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 //2)Headers
 //3)Response body
 //get,post,put,delete
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -24,7 +26,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(
-            @RequestBody UserRegisterRequest request) {
+            @Valid @RequestBody UserRegisterRequest request) {
 
         UserResponse response=userService.registerUser(request);
 

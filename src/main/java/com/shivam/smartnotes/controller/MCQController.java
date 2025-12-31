@@ -1,10 +1,12 @@
 package com.shivam.smartnotes.controller;
 
+import com.shivam.smartnotes.dto.MCQGenerateRequest;
 import com.shivam.smartnotes.dto.MCQSubmitRequest;
 import com.shivam.smartnotes.dto.MCQSubmitResponse;
 import com.shivam.smartnotes.entity.MCQ;
 import com.shivam.smartnotes.service.MCQAttemptService;
 import com.shivam.smartnotes.service.MCQService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,11 +28,10 @@ public class MCQController {
     @PostMapping("/generatemcq")
     public ResponseEntity<List<MCQ>> generateMcqs(
             @RequestParam Long userId,
-            @RequestParam String topic,
-            @RequestParam int count
-    ){
+            @Valid @RequestBody MCQGenerateRequest request
+            ){
         List<MCQ> mcqs =
-                mcqService.generateMcqs(userId, topic, count);
+                mcqService.generateMcqs(userId, request.getTopic(), request.getCount());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -51,7 +52,7 @@ public class MCQController {
 
     @PostMapping("/submit")
     public ResponseEntity<MCQSubmitResponse> submitMcqs(
-            @RequestBody MCQSubmitRequest request
+            @Valid @RequestBody MCQSubmitRequest request
     ) {
         MCQSubmitResponse response =
                 mcqAttemptService.submitMcqs(request);

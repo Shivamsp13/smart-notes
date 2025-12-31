@@ -1,5 +1,8 @@
 package com.shivam.smartnotes.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -7,22 +10,11 @@ import java.util.List;
 @Data
 public class MCQSubmitRequest {
 
+    @NotNull
     private Long userId;
+
+    @NotEmpty
+    @Valid
     private List<MCQAnswerRequest> answers;
 
-//    public Long getUserId() {
-//        return userId;
-//    }
-//
-//    public void setUserId(Long userId) {
-//        this.userId = userId;
-//    }
-//
-//    public List<McqAnswerRequest> getAnswers() {
-//        return answers;
-//    }
-//
-//    public void setAnswers(List<McqAnswerRequest> answers) {
-//        this.answers = answers;
-//    }
 }

@@ -1,17 +1,16 @@
 package com.shivam.smartnotes.dto;
 
-import com.shivam.smartnotes.entity.User;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 
 @Data
 public class NoteCreateRequest {
-    private Long noteId;
-    private User owner;
+
+    @NotBlank(message = "Title cannot be blank")
     private String title;
+
+    @NotBlank(message = "Content cannot be blank")
     private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime expiredAt;
 
 }

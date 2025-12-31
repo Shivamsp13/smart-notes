@@ -3,6 +3,7 @@ package com.shivam.smartnotes.controller;
 import com.shivam.smartnotes.dto.NoteCreateRequest;
 import com.shivam.smartnotes.dto.NoteResponse;
 import com.shivam.smartnotes.service.NotesService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class NotesController {
     @PostMapping
     public ResponseEntity<NoteResponse> createNote(
             @RequestParam Long userId,
-            @RequestBody NoteCreateRequest request
+            @Valid @RequestBody NoteCreateRequest request
     ){
         NoteResponse response=notesService.createNote(userId,request);
 

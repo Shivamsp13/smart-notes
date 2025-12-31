@@ -1,8 +1,10 @@
 package com.shivam.smartnotes.controller;
 
 import com.shivam.smartnotes.service.QuestionAnswerService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.shivam.smartnotes.dto.QuestionAskRequest;
 
 @RestController
 @RequestMapping("/questions")
@@ -13,14 +15,13 @@ public class QuestionAnswerController {
         this.questionAnswerService = questionAnswerService;
     }
 
-    // Stateless Q&A (no persistence)
     @PostMapping("/ask")
     public ResponseEntity<String> askQuestion(
             @RequestParam Long userId,
-            @RequestParam String question
+            @Valid @RequestBody QuestionAskRequest request
     ) {
         String answer =
-                questionAnswerService.askQuestion(userId, question);
+                questionAnswerService.askQuestion(userId, request.getQuestion());
 
         return ResponseEntity.ok(answer);
     }

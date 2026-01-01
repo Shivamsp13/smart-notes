@@ -10,5 +10,5 @@ import java.util.List;
 public interface MCQRepository extends JpaRepository<MCQ,Long> {
     List<MCQ> findByTopic(String topic);
 
-    List<MCQ> findByTopicAndNotes_User_UserId(String topic, Long userId);
+    List<MCQ> findByTopicAndNote_Owner_UserId(String topic, Long userId);
 }

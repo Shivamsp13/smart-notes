@@ -1,10 +1,9 @@
 package com.shivam.smartnotes.service;
 
-import com.shivam.smartnotes.entity.MCQ;
-import java.util.List;
+import com.shivam.smartnotes.dto.MCQResponse;
 
 public interface MCQService {
 
-    List<MCQ> generateMcqs(Long userId,String topic,int count);
-    List<MCQ> getMcqsByTopic(Long userId,String topic);
+    MCQResponse generateMcqs(Long userId, String topic, int count);
+    MCQResponse getMcqsByTopic(Long userId, String topic);
 }

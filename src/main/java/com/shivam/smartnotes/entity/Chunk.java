@@ -2,7 +2,8 @@ package com.shivam.smartnotes.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(
@@ -18,6 +19,15 @@ public class Chunk {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chunkId;
+
+    //This is called cascasde deletion
+    //When chunk is deleted then all mcqs belonging to that chunnk will be automatically deleted.
+    @OneToMany(
+            mappedBy = "chunk",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<MCQ> mcqs = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "note_id", nullable = false)

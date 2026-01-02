@@ -2,9 +2,10 @@ package com.shivam.smartnotes.serviceimpl;
 
 import com.shivam.smartnotes.dto.NoteCreateRequest;
 import com.shivam.smartnotes.dto.NoteResponse;
-import com.shivam.smartnotes.dto.UserResponse;
 import com.shivam.smartnotes.entity.Notes;
 import com.shivam.smartnotes.entity.User;
+import com.shivam.smartnotes.exceptions.AccessDeniedException;
+import com.shivam.smartnotes.exceptions.ResourceNotFoundException;
 import com.shivam.smartnotes.repository.NotesRepository;
 import com.shivam.smartnotes.service.ChunkService;
 import com.shivam.smartnotes.service.NotesService;
@@ -56,14 +57,15 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public NoteResponse getNoteById(Long userId, Long noteId) {
-        Notes notes = notesRepository
-                .findByNoteIdAndUser_UserId(noteId, userId)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Note not found or access denied for noteId: " + noteId
-                        )
-                );
+        Notes notes=notesRepository.findById(noteId)
+                .orElseThrow(()->
+                        new ResourceNotFoundException("Note not found with id: " + noteId)
+                        );
 
+        if(!notes.getOwner().getUserId().equals(userId)){
+            throw new
+                    AccessDeniedException("You do not own this note");
+        }
         return mapToResponse(notes);
     }
 
@@ -82,11 +84,18 @@ public class NotesServiceImpl implements NotesService {
     public void deleteNote(Long userId, Long noteId) {
         User user=userService.getUserEntityById(userId);
 
-        Notes note=notesRepository.findByIdAndOwner(noteId,user)
-                .orElseThrow(()->new RuntimeException("You don't own this note"));
+        Notes notes=notesRepository.findById(noteId)
+                .orElseThrow(()->
+                        new ResourceNotFoundException("Note not found with id: " + noteId)
+                );
 
-        chunkService.deleteChunksForNote(note);
-        notesRepository.delete(note);
+        if(!notes.getOwner().getUserId().equals(userId)){
+            throw new
+                    AccessDeniedException("You do not own this note");
+        }
+
+        chunkService.deleteChunksForNote(notes);
+        notesRepository.delete(notes);
     }
 
     @Override

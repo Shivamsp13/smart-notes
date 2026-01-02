@@ -13,7 +13,7 @@ public class NotesCleanupScheduler {
         this.noteService = noteService;
     }
 
-    @Scheduled(cron = "0 0 0 * * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void deleteExpiredNotes() {
         noteService.deleteExpiredNotes();
     }

@@ -10,6 +10,27 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//Request comes in
+// → Validate JWT
+// → Accept PDF file
+// → Call TextExtractionService
+// → Get plain text
+// → Call NoteService with String
+// → Return response
+
+//User uploads PDF
+// → Auth (JWT)
+// → Controller
+// → TextExtractionService
+// → Validation
+// → NoteService
+//   → ChunkingUtil
+//   → ChunkService
+// → Storage
+
+
+
+
 @RestController
 @RequestMapping("/notes")
 public class NotesController {

@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface NotesRepository extends JpaRepository<Notes,Long> {
     List<Notes> findAllByOwner(User owner);
-    Optional<Notes> findByIdAndOwner(Long notesId,User user);
+//    Optional<Notes> findByIdAndOwner(Long notesId,User user);
     List<Notes> findByExpiredAtBefore(LocalDateTime now);
-    Optional<Notes> findByNoteIdAndUser_UserId(Long noteId, Long userId);
+//    Optional<Notes> findByNoteIdAndUser_UserId(Long noteId, Long userId);
 }

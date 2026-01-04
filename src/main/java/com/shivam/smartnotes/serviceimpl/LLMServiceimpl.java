@@ -3,13 +3,25 @@ package com.shivam.smartnotes.serviceimpl;
 import com.shivam.smartnotes.dto.LLMRequest;
 import com.shivam.smartnotes.dto.LLMResponse;
 import com.shivam.smartnotes.service.LLMService;
+import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
 
+
+
+import java.util.List;
+
+@Service
 public class LLMServiceimpl implements LLMService {
-    private static final String LLM_API_URL= "http://localhost:9000/generate";
+
+    private static final String LLM_API_URL= "https://api.groq.com/openai/v1/chat/completions";
+
+    @Value("${groq.api.key}")
+    private String groqApiKey;
 
     private final RestTemplate restTemplate;
 
@@ -17,43 +29,56 @@ public class LLMServiceimpl implements LLMService {
         this.restTemplate = restTemplate;
     }
 
+
+
     @Override
     public String generate(String systemPrompt, String userPrompt) {
 
-        LLMRequest request=new LLMRequest(systemPrompt,userPrompt);
+        LLMRequest request = new LLMRequest(
+                "llama-3.1-8b-instant",
+                List.of(
+                        new LLMRequest.Message("system", systemPrompt),
+                        new LLMRequest.Message("user", userPrompt)
+                ),
+                0.2
+        );
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        headers.setBearerAuth(groqApiKey);
 
-        HttpEntity<LLMRequest> requestEntity =
-                new HttpEntity<>(request, headers);
+        System.out.println("Groq key length = " + groqApiKey.length());
+        System.out.println("Groq key prefix = " + groqApiKey.substring(0, 4));
+
+
+        HttpEntity<LLMRequest> entity = new HttpEntity<>(request, headers);
 
         try {
             ResponseEntity<LLMResponse> response =
                     restTemplate.exchange(
                             LLM_API_URL,
                             HttpMethod.POST,
-                            requestEntity,
+                            entity,
                             LLMResponse.class
                     );
 
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException(
-                        "LLM API failed with status: " + response.getStatusCode()
-                );
+            if (!response.getStatusCode().is2xxSuccessful()
+                    || response.getBody() == null
+                    || response.getBody().getChoices() == null
+                    || response.getBody().getChoices().isEmpty()) {
+
+                throw new RuntimeException("Invalid response from Groq LLM");
             }
 
-            if (response.getBody() == null ||
-                    response.getBody().getText() == null ||
-                    response.getBody().getText().isBlank()) {
-                throw new RuntimeException("Empty response from LLM");
-            }
-
-            return response.getBody().getText();
+            return response.getBody()
+                    .getChoices()
+                    .get(0)
+                    .getMessage()
+                    .getContent();
 
         } catch (RestClientException ex) {
-            throw new RuntimeException("Failed to call LLM service", ex);
+            throw new RuntimeException("Failed to call Groq LLM service", ex);
         }
     }
 }

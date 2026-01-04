@@ -1,18 +1,21 @@
 package com.shivam.smartnotes.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class LLMRequest {
 
-    private String userPrompt;
-    private String systemPrompt;
+    private String model;
+    private List<Message> messages;
+    private double temperature;
 
-    public LLMRequest() {}
-
-    public LLMRequest(String userPrompt, String systemPrompt) {
-        this.userPrompt = userPrompt;
-        this.systemPrompt = systemPrompt;
+    @Data
+    @AllArgsConstructor
+    public static class Message {
+        private String role;
+        private String content;
     }
-
 }

@@ -2,6 +2,7 @@ package com.shivam.smartnotes.serviceimpl;
 
 import com.shivam.smartnotes.dto.*;
 import com.shivam.smartnotes.entity.MCQ;
+import com.shivam.smartnotes.exceptions.AccessDeniedException;
 import com.shivam.smartnotes.repository.MCQRepository;
 import com.shivam.smartnotes.service.MCQAttemptService;
 import com.shivam.smartnotes.service.MCQService;
@@ -31,6 +32,17 @@ public class MCQAttemptServiceImpl implements MCQAttemptService {
                     .orElseThrow(() ->
                             new RuntimeException("MCQ not found: " + answer.getMcqId())
                     );
+
+            if (!mcq.getChunk()
+                    .getNote()
+                    .getOwner()
+                    .getUserId()
+                    .equals(request.getUserId())) {
+
+                throw new AccessDeniedException(
+                        "You do not have access to MCQ: " + answer.getMcqId()
+                );
+            }
 
             boolean correct =
                     mcq.getCorrectOptionIndex() == answer.getSelectedOptionIndex();

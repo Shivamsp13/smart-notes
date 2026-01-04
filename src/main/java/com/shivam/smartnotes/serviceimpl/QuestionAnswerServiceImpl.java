@@ -5,11 +5,12 @@ import com.shivam.smartnotes.repository.ChunkRepository;
 import com.shivam.smartnotes.service.EmbeddingService;
 import com.shivam.smartnotes.service.LLMService;
 import com.shivam.smartnotes.service.QuestionAnswerService;
-
+import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class QuestionAnswerServiceImpl implements QuestionAnswerService {
     private static final int TOP_K_CHUNKS=5;
     private static final double COSINE_SIMILARITY_THRESHOLD=0.35;
@@ -34,7 +35,7 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
         String questionEmbedding=embeddingService.generateEmbedding(question);
 
         List<Chunk> chunks=
-                chunkRepository.findByNotes_User_UserId(userId);
+                chunkRepository.findByNote_Owner_UserId(userId);
 
         if(chunks.isEmpty()){
             return FALLBACK_RESPONSE;
@@ -57,6 +58,7 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
         if (ranked.get(0).score() < COSINE_SIMILARITY_THRESHOLD) {
             return FALLBACK_RESPONSE;
         }
+
         String context=
         ranked.stream()
                 .limit(TOP_K_CHUNKS)

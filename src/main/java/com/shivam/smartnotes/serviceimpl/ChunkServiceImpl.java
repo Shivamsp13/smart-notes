@@ -25,7 +25,7 @@ public class ChunkServiceImpl implements ChunkService {
     public void createChunksForNote(Notes notes){
 
         //if there is duplicate of it, it will be deleted,ensures no duplicacy.
-        chunkRepository.deleteByNotes(notes);
+        chunkRepository.deleteByNote(notes);
         List<ChunkData> chunkDataList=
                 ChunkingUtil.chunkText(notes.getContent());
 
@@ -52,7 +52,7 @@ public class ChunkServiceImpl implements ChunkService {
 
     @Override
     public void deleteChunksForNote(Notes notes) {
-        chunkRepository.deleteByNotes(notes);
+        chunkRepository.deleteByNote(notes);
 
     }
 }

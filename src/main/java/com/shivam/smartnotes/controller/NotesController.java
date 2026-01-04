@@ -7,7 +7,11 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.shivam.smartnotes.service.TextExtractionService;
 
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 //Request comes in
@@ -35,16 +39,25 @@ import java.util.List;
 @RequestMapping("/notes")
 public class NotesController {
     private final NotesService notesService;
+    private final TextExtractionService textExtractionService;
 
-    public NotesController(NotesService notesService) {
+    public NotesController(NotesService notesService,TextExtractionService textExtractionService) {
         this.notesService = notesService;
+        this.textExtractionService=textExtractionService;
     }
 
-    @PostMapping
-    public ResponseEntity<NoteResponse> createNote(
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<NoteResponse> createNoteFromPDF(
             @RequestParam Long userId,
-            @Valid @RequestBody NoteCreateRequest request
+            @RequestParam("file") MultipartFile pdfFile,
+            @RequestParam String title
     ){
+        String extractedText = textExtractionService.extractText(pdfFile);
+
+        NoteCreateRequest request = new NoteCreateRequest();
+        request.setTitle(title);
+        request.setContent(extractedText);
+
         NoteResponse response=notesService.createNote(userId,request);
 
         return ResponseEntity

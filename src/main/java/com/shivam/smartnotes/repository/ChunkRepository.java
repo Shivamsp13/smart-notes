@@ -9,13 +9,9 @@ import java.util.List;
 
 @Repository
 public interface ChunkRepository extends JpaRepository<Chunk,Long> {
-    List<Chunk> findByNotesOrderByOrderIndexAsc(Notes notes);
+//    List<Chunk> findByNoteOrderByOrderIndexAsc(Notes note);
 
-    List<Chunk> findByNotesAndNoteOwner(Notes notes, User owner);
+    void deleteByNote(Notes note);
 
-    void deleteByNotes(Notes notes);
-
-    List<Chunk> findByUserIdAndKeywords(Long userId, String topic);
-
-    List<Chunk> findByNotes_User_UserId(Long userId);
+    List<Chunk> findByNote_Owner_UserId(Long userId);
 }

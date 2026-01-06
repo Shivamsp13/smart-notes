@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+
+# OCR
+pillow
+pytesseract
+opencv-python
+
+# Embeddings
+sentence-transformers
+torch
+numpy

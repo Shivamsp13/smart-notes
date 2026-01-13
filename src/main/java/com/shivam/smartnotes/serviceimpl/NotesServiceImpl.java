@@ -7,9 +7,9 @@ import com.shivam.smartnotes.entity.User;
 import com.shivam.smartnotes.exceptions.AccessDeniedException;
 import com.shivam.smartnotes.exceptions.ResourceNotFoundException;
 import com.shivam.smartnotes.repository.NotesRepository;
+import com.shivam.smartnotes.repository.UserRepository;
 import com.shivam.smartnotes.service.ChunkService;
 import com.shivam.smartnotes.service.NotesService;
-import com.shivam.smartnotes.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -22,25 +22,26 @@ import java.util.stream.Collectors;
 public class NotesServiceImpl implements NotesService {
 
     private final NotesRepository notesRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final ChunkService chunkService;
 
     public NotesServiceImpl(
             NotesRepository notesRepository,
-            UserService userService,
-            ChunkService chunkService){
-
-        this.notesRepository=notesRepository;
-        this.chunkService=chunkService;
-        this.userService=userService;
+            UserRepository userRepository,
+            ChunkService chunkService
+    ) {
+        this.notesRepository = notesRepository;
+        this.userRepository = userRepository;
+        this.chunkService = chunkService;
     }
+
     @Override
-    public NoteResponse createNote(Long userId, NoteCreateRequest request) {
-        User user=userService.getUserEntityById(userId);
+    public NoteResponse createNote(String username, NoteCreateRequest request) {
+        User user = getUserByUsername(username);
 
-        LocalDateTime expiry=LocalDateTime.now().plusDays(30);
+        LocalDateTime expiry = LocalDateTime.now().plusDays(30);
 
-        Notes notes =new Notes(
+        Notes notes = new Notes(
                 user,
                 request.getTitle(),
                 request.getContent(),
@@ -48,31 +49,35 @@ public class NotesServiceImpl implements NotesService {
                 LocalDateTime.now()
         );
 
-
-        Notes savedNote=notesRepository.save(notes);
+        Notes savedNote = notesRepository.save(notes);
         chunkService.createChunksForNote(savedNote);
 
         return mapToResponse(savedNote);
     }
 
     @Override
-    public NoteResponse getNoteById(Long userId, Long noteId) {
-        Notes notes=notesRepository.findById(noteId)
-                .orElseThrow(()->
-                        new ResourceNotFoundException("Note not found with id: " + noteId)
-                        );
+    public NoteResponse getNoteById(String username, Long noteId) {
 
-        if(!notes.getOwner().getUserId().equals(userId)){
-            throw new
-                    AccessDeniedException("You do not own this note");
+        User user = getUserByUsername(username);
+
+        Notes notes = notesRepository.findById(noteId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Note not found with id: " + noteId
+                        )
+                );
+
+        if (!notes.getOwner().equals(user)) {
+            throw new AccessDeniedException("You do not own this note");
         }
+
         return mapToResponse(notes);
     }
 
-
     @Override
-    public List<NoteResponse> getAllNoteForUser(Long userId) {
-        User user=userService.getUserEntityById(userId);
+    public List<NoteResponse> getAllNotesForUser(String username) {
+
+        User user = getUserByUsername(username);
 
         return notesRepository.findAllByOwner(user)
                 .stream()
@@ -81,17 +86,19 @@ public class NotesServiceImpl implements NotesService {
     }
 
     @Override
-    public void deleteNote(Long userId, Long noteId) {
-        User user=userService.getUserEntityById(userId);
+    public void deleteNote(String username, Long noteId) {
 
-        Notes notes=notesRepository.findById(noteId)
-                .orElseThrow(()->
-                        new ResourceNotFoundException("Note not found with id: " + noteId)
+        User user = getUserByUsername(username);
+
+        Notes notes = notesRepository.findById(noteId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Note not found with id: " + noteId
+                        )
                 );
 
-        if(!notes.getOwner().getUserId().equals(userId)){
-            throw new
-                    AccessDeniedException("You do not own this note");
+        if (!notes.getOwner().equals(user)) {
+            throw new AccessDeniedException("You do not own this note");
         }
 
         chunkService.deleteChunksForNote(notes);
@@ -100,16 +107,26 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public void deleteExpiredNotes() {
-        List<Notes> expiredNotes=notesRepository
-                .findByExpiredAtBefore(LocalDateTime.now());
 
-        for(Notes note:expiredNotes){
+        List<Notes> expiredNotes =
+                notesRepository.findByExpiredAtBefore(LocalDateTime.now());
+
+        for (Notes note : expiredNotes) {
             chunkService.deleteChunksForNote(note);
             notesRepository.delete(note);
         }
     }
 
-    public NoteResponse mapToResponse(Notes notes){
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with username: " + username
+                        )
+                );
+    }
+
+    private NoteResponse mapToResponse(Notes notes) {
         return new NoteResponse(
                 notes.getNoteId(),
                 notes.getOwner().getUsername(),

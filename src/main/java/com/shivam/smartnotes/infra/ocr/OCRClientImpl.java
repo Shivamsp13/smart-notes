@@ -2,6 +2,7 @@ package com.shivam.smartnotes.infra.ocr;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -14,7 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OCRClientImpl implements OCRClient{
 
-    private final RestTemplate restTemplate;
+    private final @Qualifier("ocrRestTemplate") RestTemplate restTemplate;
     private final OCRProperties ocrProperties;
 
     @Override

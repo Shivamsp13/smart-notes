@@ -10,4 +10,5 @@ public class MCQItem {
     private List<String> options;
     private int correctOptionIndex;
     private String explanation;
+
 }

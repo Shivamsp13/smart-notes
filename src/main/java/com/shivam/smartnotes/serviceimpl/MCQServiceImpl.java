@@ -5,10 +5,12 @@ import com.shivam.smartnotes.dto.MCQItem;
 import com.shivam.smartnotes.dto.MCQResponse;
 import com.shivam.smartnotes.entity.Chunk;
 import com.shivam.smartnotes.entity.MCQ;
+import com.shivam.smartnotes.entity.User;
 import com.shivam.smartnotes.exceptions.InternalSeviceException;
 import com.shivam.smartnotes.exceptions.ResourceNotFoundException;
 import com.shivam.smartnotes.repository.ChunkRepository;
 import com.shivam.smartnotes.repository.MCQRepository;
+import com.shivam.smartnotes.repository.UserRepository;
 import com.shivam.smartnotes.service.EmbeddingService;
 import com.shivam.smartnotes.service.LLMService;
 import com.shivam.smartnotes.service.MCQService;
@@ -26,28 +28,35 @@ public class MCQServiceImpl implements MCQService {
 
     private final ChunkRepository chunkRepository;
     private final MCQRepository mcqRepository;
+    private final UserRepository userRepository;
     private final EmbeddingService embeddingService;
     private final LLMService llmService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public MCQServiceImpl(ChunkRepository chunkRepository,
-                          MCQRepository mcqRepository,
-                          EmbeddingService embeddingService,
-                          LLMService llmService) {
+    public MCQServiceImpl(
+            ChunkRepository chunkRepository,
+            MCQRepository mcqRepository,
+            UserRepository userRepository,
+            EmbeddingService embeddingService,
+            LLMService llmService
+    ) {
         this.chunkRepository = chunkRepository;
         this.mcqRepository = mcqRepository;
+        this.userRepository = userRepository;
         this.embeddingService = embeddingService;
         this.llmService = llmService;
     }
 
     @Override
-    public MCQResponse generateMcqs(Long userId, String topic, int count) {
+    public MCQResponse generateMcqs(String username, String topic, int count) {
+
+        User user = getUserByUsername(username);
 
         String topicEmbedding = embeddingService.generateEmbedding(topic);
 
         List<Chunk> userChunks =
-                chunkRepository.findByNote_Owner_UserId(userId);
+                chunkRepository.findByNote_Owner(user);
 
         if (userChunks.isEmpty()) {
             throw new ResourceNotFoundException("No notes found for user");
@@ -56,7 +65,7 @@ public class MCQServiceImpl implements MCQService {
         List<Chunk> topChunks =
                 userChunks.stream()
                         .sorted(Comparator.comparingDouble(
-                                        (Chunk c) -> embeddingService.cosineSimilarity(
+                                (Chunk c) -> embeddingService.cosineSimilarity(
                                         c.getEmbedding(),
                                         topicEmbedding
                                 )
@@ -131,7 +140,6 @@ public class MCQServiceImpl implements MCQService {
 
         mcqRepository.saveAll(mcqEntities);
 
-        // ✅ RETURN DTO (NOT ENTITIES)
         MCQResponse finalResponse = new MCQResponse();
         finalResponse.setTopic(topic);
         finalResponse.setMcqs(items);
@@ -140,13 +148,12 @@ public class MCQServiceImpl implements MCQService {
     }
 
     @Override
-    public MCQResponse getMcqsByTopic(Long userId, String topic) {
+    public MCQResponse getMcqsByTopic(String username, String topic) {
+
+        User user = getUserByUsername(username);
 
         List<MCQ> mcqs =
-                mcqRepository.findByTopicAndNote_Owner_UserId(
-                        topic,
-                        userId
-                );
+                mcqRepository.findByTopicAndNote_Owner(topic, user);
 
         if (mcqs.isEmpty()) {
             throw new ResourceNotFoundException(
@@ -203,5 +210,14 @@ public class MCQServiceImpl implements MCQService {
                 sourceChunk.getNote(),
                 sourceChunk
         );
+    }
+
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with username: " + username
+                        )
+                );
     }
 }

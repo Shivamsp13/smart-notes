@@ -8,10 +8,10 @@ import java.util.List;
 
 public interface NotesService {
 
-    NoteResponse createNote(Long userid, NoteCreateRequest request);
-    NoteResponse getNoteById(Long userId,Long noteId);
+    NoteResponse createNote(String username, NoteCreateRequest request);
+    NoteResponse getNoteById(String username,Long noteId);
 
-    List<NoteResponse>  getAllNoteForUser(Long userid);
-    void deleteNote(Long userId, Long noteId);
+    List<NoteResponse>  getAllNotesForUser(String username);
+    void deleteNote(String username, Long noteId);
     void deleteExpiredNotes();
 }

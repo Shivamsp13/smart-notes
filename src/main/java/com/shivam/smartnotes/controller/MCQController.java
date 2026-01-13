@@ -4,6 +4,7 @@ import com.shivam.smartnotes.dto.MCQGenerateRequest;
 import com.shivam.smartnotes.dto.MCQResponse;
 import com.shivam.smartnotes.dto.MCQSubmitRequest;
 import com.shivam.smartnotes.dto.MCQSubmitResponse;
+import com.shivam.smartnotes.security.SecurityUtil;
 import com.shivam.smartnotes.service.MCQAttemptService;
 import com.shivam.smartnotes.service.MCQService;
 import jakarta.validation.Valid;
@@ -18,20 +19,23 @@ public class MCQController {
     private final MCQService mcqService;
     private final MCQAttemptService mcqAttemptService;
 
-    public MCQController(MCQService mcqService,
-                         MCQAttemptService mcqAttemptService) {
+    public MCQController(
+            MCQService mcqService,
+            MCQAttemptService mcqAttemptService
+    ) {
         this.mcqService = mcqService;
         this.mcqAttemptService = mcqAttemptService;
     }
 
     @PostMapping("/generatemcq")
     public ResponseEntity<MCQResponse> generateMcqs(
-            @RequestParam Long userId,
             @Valid @RequestBody MCQGenerateRequest request
     ) {
+        String username = SecurityUtil.getCurrentUsername();
+
         MCQResponse response =
                 mcqService.generateMcqs(
-                        userId,
+                        username,
                         request.getTopic(),
                         request.getCount()
                 );
@@ -43,11 +47,12 @@ public class MCQController {
 
     @GetMapping
     public ResponseEntity<MCQResponse> getMcqsByTopic(
-            @RequestParam Long userId,
             @RequestParam String topic
     ) {
+        String username = SecurityUtil.getCurrentUsername();
+
         MCQResponse response =
-                mcqService.getMcqsByTopic(userId, topic);
+                mcqService.getMcqsByTopic(username, topic);
 
         return ResponseEntity.ok(response);
     }

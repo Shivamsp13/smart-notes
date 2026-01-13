@@ -8,6 +8,7 @@ import com.shivam.smartnotes.exceptions.UserNotFoundException;
 import com.shivam.smartnotes.repository.UserRepository;
 import com.shivam.smartnotes.service.UserService;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,9 +16,11 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository){
+    public UserServiceImpl(UserRepository userRepository,PasswordEncoder passwordEncoder){
         this.userRepository=userRepository;
+        this.passwordEncoder=passwordEncoder;
     }
 
     @Override
@@ -30,9 +33,10 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistException("Email Already Exists"+request.getEmail());
         }
 
+
         User user=User.builder().email(request.getEmail())
                 .username(request.getUsername())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
         User savedUser=userRepository.save(user);

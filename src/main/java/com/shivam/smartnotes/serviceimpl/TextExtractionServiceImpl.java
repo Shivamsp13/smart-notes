@@ -1,5 +1,4 @@
 package com.shivam.smartnotes.serviceimpl;
-
 import com.shivam.smartnotes.infra.ocr.OCRClient;
 import com.shivam.smartnotes.service.TextExtractionService;
 import com.shivam.smartnotes.utils.TextQualityEvaluator;

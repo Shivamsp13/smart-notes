@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestTemplateConfig {
 
-    @Bean
+    @Bean(name="ocrRestTemplate")
     public RestTemplate restTemplate(OCRProperties ocrProperties) {
 
         SimpleClientHttpRequestFactory requestFactory =

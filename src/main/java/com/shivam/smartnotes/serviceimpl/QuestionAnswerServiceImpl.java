@@ -1,43 +1,57 @@
 package com.shivam.smartnotes.serviceimpl;
 
 import com.shivam.smartnotes.entity.Chunk;
+import com.shivam.smartnotes.entity.User;
+import com.shivam.smartnotes.exceptions.ResourceNotFoundException;
 import com.shivam.smartnotes.repository.ChunkRepository;
+import com.shivam.smartnotes.repository.UserRepository;
 import com.shivam.smartnotes.service.EmbeddingService;
 import com.shivam.smartnotes.service.LLMService;
 import com.shivam.smartnotes.service.QuestionAnswerService;
 import org.springframework.stereotype.Service;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class QuestionAnswerServiceImpl implements QuestionAnswerService {
-    private static final int TOP_K_CHUNKS=5;
-    private static final double COSINE_SIMILARITY_THRESHOLD=0.35;
 
-    private static final String FALLBACK_RESPONSE=
+    private static final int TOP_K_CHUNKS = 5;
+    private static final double COSINE_SIMILARITY_THRESHOLD = 0.35;
+
+    private static final String FALLBACK_RESPONSE =
             "The answer to this question does not exist in your notes.";
 
     private final ChunkRepository chunkRepository;
+    private final UserRepository userRepository;
     private final EmbeddingService embeddingService;
     private final LLMService llmService;
 
-    public QuestionAnswerServiceImpl(ChunkRepository chunkRepository, EmbeddingService embeddingService, LLMService llmService) {
+    public QuestionAnswerServiceImpl(
+            ChunkRepository chunkRepository,
+            UserRepository userRepository,
+            EmbeddingService embeddingService,
+            LLMService llmService
+    ) {
         this.chunkRepository = chunkRepository;
+        this.userRepository = userRepository;
         this.embeddingService = embeddingService;
         this.llmService = llmService;
     }
 
-
     @Override
-    public String askQuestion(Long userId, String question) {
+    public String askQuestion(String username, String question) {
 
-        String questionEmbedding=embeddingService.generateEmbedding(question);
+        User user = getUserByUsername(username);
 
-        List<Chunk> chunks=
-                chunkRepository.findByNote_Owner_UserId(userId);
+        String questionEmbedding =
+                embeddingService.generateEmbedding(question);
 
-        if(chunks.isEmpty()){
+        List<Chunk> chunks =
+                chunkRepository.findByNote_Owner(user);
+
+        if (chunks.isEmpty()) {
             return FALLBACK_RESPONSE;
         }
 
@@ -59,11 +73,11 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
             return FALLBACK_RESPONSE;
         }
 
-        String context=
-        ranked.stream()
-                .limit(TOP_K_CHUNKS)
-                .map(sc -> sc.chunk().getChunkText())
-                .collect(Collectors.joining("\n\n"));
+        String context =
+                ranked.stream()
+                        .limit(TOP_K_CHUNKS)
+                        .map(sc -> sc.chunk().getChunkText())
+                        .collect(Collectors.joining("\n\n"));
 
         String systemPrompt =
                 """
@@ -83,7 +97,17 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
                 "%s"
                 """.formatted(context, question);
 
-        return llmService.generate(systemPrompt,userPrompt);
+        return llmService.generate(systemPrompt, userPrompt);
     }
+
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with username: " + username
+                        )
+                );
+    }
+
     private record ScoredChunk(Chunk chunk, double score) {}
 }

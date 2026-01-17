@@ -41,7 +41,11 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
     }
 
     @Override
-    public String askQuestion(String username, String question) {
+    public String askQuestion(
+            Long noteId,
+            String username,
+            String question
+    ) {
 
         User user = getUserByUsername(username);
 
@@ -49,7 +53,10 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
                 embeddingService.generateEmbedding(question);
 
         List<Chunk> chunks =
-                chunkRepository.findByNote_Owner(user);
+                chunkRepository.findByNote_NoteIdAndNote_Owner(
+                        noteId,
+                        user
+                );
 
         if (chunks.isEmpty()) {
             return FALLBACK_RESPONSE;

@@ -13,4 +13,6 @@ public interface ChunkRepository extends JpaRepository<Chunk,Long> {
     void deleteByNote(Notes note);
     List<Chunk> findByNote_Owner(User owner);
 
+
+    List<Chunk> findByNote_NoteIdAndNote_Owner(Long noteId, User user);
 }

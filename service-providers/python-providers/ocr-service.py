@@ -12,24 +12,13 @@ app = FastAPI()
 
 
 def preprocess_image(pil_image):
-    """
-    Preprocess image to improve OCR accuracy.
-    Steps:
-    - Convert to grayscale
-    - Noise reduction
-    - Adaptive thresholding
-    """
 
-    # PIL -> OpenCV (numpy array)
     image = np.array(pil_image)
 
-    # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Reduce noise
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
 
-    # Adaptive thresholding (handles uneven lighting)
     thresh = cv2.adaptiveThreshold(
         gray,
         255,
@@ -49,16 +38,12 @@ async def extract_text(image: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid image type")
 
     try:
-        # Read image bytes
         image_bytes = await image.read()
 
-        # Load image with PIL
         pil_image = Image.open(io.BytesIO(image_bytes))
 
-        # Preprocess image
         processed_image = preprocess_image(pil_image)
 
-        # Run OCR
         extracted_text = pytesseract.image_to_string(
             processed_image,
             config="--psm 6"

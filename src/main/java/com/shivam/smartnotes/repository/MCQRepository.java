@@ -1,5 +1,6 @@
 package com.shivam.smartnotes.repository;
 
+import com.shivam.smartnotes.entity.Chunk;
 import com.shivam.smartnotes.entity.MCQ;
 import com.shivam.smartnotes.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,9 @@ import java.util.List;
 public interface MCQRepository extends JpaRepository<MCQ,Long> {
     List<MCQ> findByTopic(String topic);
     List<MCQ> findByTopicAndNote_Owner(String topic, User owner);
+    List<Chunk> findByNote_NoteIdAndNote_Owner(
+            Long noteId,
+            User owner
+    );
+
 }

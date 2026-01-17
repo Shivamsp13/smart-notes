@@ -49,17 +49,28 @@ public class MCQServiceImpl implements MCQService {
     }
 
     @Override
-    public MCQResponse generateMcqs(String username, String topic, int count) {
+    public MCQResponse generateMcqs(
+            Long noteId,
+            String username,
+            String topic,
+            int count
+    ) {
 
         User user = getUserByUsername(username);
 
-        String topicEmbedding = embeddingService.generateEmbedding(topic);
+        String topicEmbedding =
+                embeddingService.generateEmbedding(topic);
 
         List<Chunk> userChunks =
-                chunkRepository.findByNote_Owner(user);
+                chunkRepository.findByNote_NoteIdAndNote_Owner(
+                        noteId,
+                        user
+                );
 
         if (userChunks.isEmpty()) {
-            throw new ResourceNotFoundException("No notes found for user");
+            throw new ResourceNotFoundException(
+                    "No content found for selected note"
+            );
         }
 
         List<Chunk> topChunks =

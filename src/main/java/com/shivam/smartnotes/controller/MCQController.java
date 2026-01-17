@@ -32,9 +32,10 @@ public class MCQController {
             @Valid @RequestBody MCQGenerateRequest request
     ) {
         String username = SecurityUtil.getCurrentUsername();
-
+//        System.out.println("MCQ noteId received = " + request.getNoteId());
         MCQResponse response =
                 mcqService.generateMcqs(
+                        request.getNoteId(),
                         username,
                         request.getTopic(),
                         request.getCount()

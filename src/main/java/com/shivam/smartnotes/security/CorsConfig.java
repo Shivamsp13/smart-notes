@@ -17,7 +17,6 @@ public class CorsConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        // Use patterns to allow file:// and null origins
         config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

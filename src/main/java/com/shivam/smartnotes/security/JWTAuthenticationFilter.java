@@ -34,31 +34,24 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        System.out.println("=== JWT Filter ===");
-        System.out.println("Request URI: " + request.getRequestURI());
 
         String authHeader = request.getHeader("Authorization");
         System.out.println("Auth Header: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("No valid Authorization header found");
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
-        System.out.println("Token extracted: " + token.substring(0, 20) + "...");
 
         try {
             if (jwtUtil.validateToken(token)) {
-                System.out.println("Token is valid");
 
                 String username = jwtUtil.extractUsername(token);
-                System.out.println("Username from token: " + username);
 
                 UserDetails userDetails =
                         userDetailsService.loadUserByUsername(username);
-                System.out.println("UserDetails loaded: " + userDetails.getUsername());
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -74,16 +67,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
                 System.out.println("Authentication set in SecurityContext");
-            } else {
-                System.out.println("Token validation failed");
             }
         } catch (Exception e) {
-            System.out.println("Exception in JWT filter: " + e.getClass().getName());
-            System.out.println("Exception message: " + e.getMessage());
             e.printStackTrace();
         }
 
-        System.out.println("=== End JWT Filter ===\n");
         filterChain.doFilter(request, response);
     }
 }

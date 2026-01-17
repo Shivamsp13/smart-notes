@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
-////mvn clean compile->use this to check the condition of the app.
 @SpringBootApplication
 @EnableScheduling
 public class SmartNotesApplication {

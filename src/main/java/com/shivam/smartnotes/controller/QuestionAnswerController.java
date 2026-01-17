@@ -24,7 +24,6 @@ public class QuestionAnswerController {
             @Valid @RequestBody QuestionAskRequest request
     ) {
         String username = SecurityUtil.getCurrentUsername();
-        System.out.println("MCQ noteId received = " + request.getNoteId());
         String answer =
                 questionAnswerService.askQuestion(
                         request.getNoteId(),

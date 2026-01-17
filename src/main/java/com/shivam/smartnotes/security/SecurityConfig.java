@@ -25,34 +25,26 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // CORS for frontend on localhost:3000
                 .cors(cors -> {})
 
-                // Stateless JWT → no CSRF
                 .csrf(csrf -> csrf.disable())
 
-                // No sessions
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
 
-                        // Allow preflight requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Public auth endpoints
                         .requestMatchers(
                                 "/auth/login",
                                 "/users/register"
                         ).permitAll()
 
-                        // Everything else requires JWT
                         .anyRequest().authenticated()
                 )
 
-                // JWT filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class

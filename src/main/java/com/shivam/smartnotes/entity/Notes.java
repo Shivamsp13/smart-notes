@@ -1,12 +1,12 @@
 package com.shivam.smartnotes.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+
 @Entity
 @Table(name="notes")
 @Data
@@ -30,7 +30,11 @@ public class Notes {
     private User owner;
 
     private String title;
+
+    @Lob  // ✅ Added this annotation to allow large text
+    @Column(name = "content", columnDefinition = "TEXT")  // ✅ Use TEXT type
     private String content;
+
     private LocalDateTime createdAt;
     private LocalDateTime expiredAt;
 

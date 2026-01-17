@@ -71,7 +71,6 @@ async def extract_text(image: UploadFile = File(...)):
         )
 
     except Exception as e:
-        # OCR must NEVER crash the caller
         return JSONResponse(
             status_code=500,
             content={

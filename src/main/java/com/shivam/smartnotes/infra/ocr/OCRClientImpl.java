@@ -3,8 +3,11 @@ package com.shivam.smartnotes.infra.ocr;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,8 +28,19 @@ public class OCRClientImpl implements OCRClient{
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            HttpEntity<byte[]> requestEntity =
-                    new HttpEntity<>(imageBytes, headers);
+            ByteArrayResource resource = new ByteArrayResource(imageBytes) {
+                @Override
+                public String getFilename() {
+                    return "page_" + pageIndex + ".png";
+                }
+            };
+
+            // Use MultiValueMap for proper multipart/form-data
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("image", resource);  // ✅ Changed from "file" to "image"
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity =
+                    new HttpEntity<>(body, headers);
 
             String url = ocrProperties.getBaseURL() + "/ocr/extract";
 

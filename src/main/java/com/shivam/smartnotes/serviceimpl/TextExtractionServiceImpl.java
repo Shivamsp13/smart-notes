@@ -21,7 +21,7 @@ import javax.imageio.ImageIO;
 public class TextExtractionServiceImpl implements TextExtractionService {
 
     private static final long MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
-    private static final int MAX_PAGE_COUNT = 100;
+    private static final int MAX_PAGE_COUNT = 1000;
 
     private final OCRClient ocrClient;
     private final OCRProperties ocrProperties;

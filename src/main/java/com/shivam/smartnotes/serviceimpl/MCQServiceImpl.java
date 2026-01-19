@@ -128,6 +128,7 @@ public class MCQServiceImpl implements MCQService {
         String rawResponse =
                 llmService.generate(systemPrompt, userPrompt);
 
+
         MCQResponse parsedResponse;
         try {
             parsedResponse =
@@ -149,12 +150,24 @@ public class MCQServiceImpl implements MCQService {
                         })
                         .toList();
 
-        mcqRepository.saveAll(mcqEntities);
+        List<MCQ> savedMcqs = mcqRepository.saveAll(mcqEntities);
+
+        List<MCQItem> responseItems =
+                savedMcqs.stream()
+                        .map(mcq -> {
+                            MCQItem item = new MCQItem();
+                            item.setMcqId(mcq.getMcqId());
+                            item.setQuestion(mcq.getQuestion());
+                            item.setOptions(mcq.getOptions());
+                            item.setCorrectOptionIndex(mcq.getCorrectOptionIndex());
+                            item.setExplanation(mcq.getExplanation());
+                            return item;
+                        })
+                        .toList();
 
         MCQResponse finalResponse = new MCQResponse();
         finalResponse.setTopic(topic);
-        finalResponse.setMcqs(items);
-
+        finalResponse.setMcqs(responseItems);
         return finalResponse;
     }
 

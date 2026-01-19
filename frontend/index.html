@@ -792,7 +792,7 @@
 
     async function submitMCQ() {
         const answers = currentMCQs.mcqs.map((mcq, index) => ({
-            mcqId: index + 1,
+            mcqId: mcq.mcqId,
             selectedOptionIndex: userAnswers[index] ?? 0
         }));
 

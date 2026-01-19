@@ -36,7 +36,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 
         String authHeader = request.getHeader("Authorization");
-        System.out.println("Auth Header: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -66,7 +65,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
-                System.out.println("Authentication set in SecurityContext");
             }
         } catch (Exception e) {
             e.printStackTrace();

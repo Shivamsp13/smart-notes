@@ -224,6 +224,3 @@ This project was built to demonstrate **real backend engineering and AI integrat
 
 ---
 
-<h2>📄 License</h2>
-
-This project is intended for educational and demonstration purposes.

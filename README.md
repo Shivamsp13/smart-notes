@@ -220,7 +220,7 @@ Further work would be enhancements, not requirements.
 
 **Shivam Pandey**
 
-This project was built to demonstrate **real backend engineering and AI integration**, not just framework usage.
+This project was built to demonstrate **real backend engineering and AI integration**
 
 ---
 
